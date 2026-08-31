@@ -1,133 +1,92 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Aug 27 21:15:40 2026
-
-@author: German
-"""
 import numpy as np
 import scipy.signal as signal
 import matplotlib.pyplot as plt
 
-# =====================================================================
-# 1. CONFIGURACIÓN Y PARÁMETROS GENERALES
-# =====================================================================
-N = 1000          # Número de muestras requerido por el enunciado
-f0 = 2000         # Frecuencia fundamental de las señales (2 kHz)
+# ==========================================
+# 1. PARÁMETROS GENERALES DE MUESTREO
+# ==========================================
+N = 1000          # Número de muestras 
+f0 = 2000         # Frecuencia de las señales (2 kHz)
 
-# Nyquist y puntos por período:
-# Para tener al menos 10 puntos por período de una señal de 2 kHz,
-# la frecuencia de muestreo fs debe ser como mínimo: 10 * f0 = 20 kHz.
-fs = 20000        # Frecuencia de muestreo elegida (20 kHz)
-Ts = 1.0 / fs     # Período de muestreo (50 microsegundos)
-t = np.arange(N) * Ts  # Vector de tiempo continuo muestreado (segundos)
+# Elegimos fs = 20 kHz para cumplir el requisito de tener "al menos 10 puntos por período"
+# (fs / f0 = 20000 / 2000 = exactamente 10 puntos por ciclo)
+fs = 20000        
+t = np.arange(N) / fs
 
-# =====================================================================
-# 2. SÍNTESIS DE LAS SEÑALES EN EL TIEMPO
-# =====================================================================
+# ==========================================
+# 2. SÍNTESIS DE LAS 5 SEÑALES
+# ==========================================
 
-# Señal 1: Senoidal de 2 kHz (Amplitud A=1V => Potencia media = A^2/2 = 0.5 W)
+# Señal 1: Senoidal de 2 kHz (Amplitud de 1 V)
 x1 = np.sin(2 * np.pi * f0 * t)
 
-# Señal 2: Cosenoidal con 2 W de potencia media y desfasada en pi/2 (Coseno puro)
-# P = A^2 / 2 = 2 W => A^2 = 4 => Amplitud A = 2 V.
-x2 = 2 * np.cos(2 * np.pi * f0 * t)
+# Señal 2: Seno desfasado pi/2 con potencia media de 2W y Amplitud A = 2 V
+x2 = 2 * np.sin(2 * np.pi * f0 * t + np.pi / 2)
 
-# Señal 3: Ruido Blanco Gaussiano, DC = 0V, Varianza (Potencia) = 0.1 W
-# Para ruido de media cero, la potencia media es la varianza (sigma^2 = 0.1).
-# Desviación estándar (escala) = sqrt(0.1)
-x3 = np.random.normal(loc=0.0, scale=np.sqrt(0.1), size=N)
+# Señal 3: Ruido normalmente distribuido (Gaussiano), DC = 0V, Varianza = 0.1 W
+# Para el ruido, Potencia = Varianza (sigma^2). La desviación estándar es sqrt(0.1)
+std_gauss = np.sqrt(0.1)
+x3 = np.random.normal(0, std_gauss, N)
 
-# Señal 4: Ruido Blanco Uniforme, DC = 0V, Varianza (Potencia) = 0.1 W
-# Para distribución uniforme en el intervalo [-b, b], la varianza es b^2 / 3.
-# b^2 / 3 = 0.1 => b = sqrt(0.3) ≈ 0.5477 V
+# Señal 4: Ruido uniformemente distribuido, DC = 0V, Varianza = 0.1 W
+# Para distribución uniforme en [-b, b], Varianza = b^2 / 3 = 0.1 -> b = sqrt(0.3)
 limite_b = np.sqrt(0.3)
-x4 = np.random.uniform(low=-limite_b, high=limite_b, size=N)
+x4 = np.random.uniform(-limite_b, limite_b, N)
 
-# Señal 5: Pulso rectangular (onda cuadrada) de 2 kHz, 1 W de potencia y duty cycle 50%
-# Para una onda cuadrada simétrica entre -A y A, la potencia es A^2.
-# P = A^2 = 1 W => Amplitud A = 1 V.
+# Señal 5: Pulso rectangular (onda cuadrada) de 2 kHz, Potencia = 1 W, Ciclo de actividad = 50%
+# Potencia = A^2 = 1W -> Amplitud = 1 V
 x5 = signal.square(2 * np.pi * f0 * t, duty=0.5)
 
-# BONUS 1: Señal extra de scipy.signal (Dientes de Sierra - Sawtooth)
-# Amplitud A = 1 V => Potencia teórica media = A^2 / 3 ≈ 0.333 W
-x_bonus = signal.sawtooth(2 * np.pi * f0 * t)
-
-# Empaquetamos todo en una estructura para procesar en bucle de forma elegante
-senales = [
-    {"nombre": "Seno (2 kHz, A=1)", "datos": x1, "teorica": 0.5},
-    {"nombre": "Coseno (2 kHz, A=2, P=2W)", "datos": x2, "teorica": 2.0},
-    {"nombre": "Ruido Gaussiano (P=0.1W)", "datos": x3, "teorica": 0.1},
-    {"nombre": "Ruido Uniforme (P=0.1W)", "datos": x4, "teorica": 0.1},
-    {"nombre": "Pulso Cuadrado (2 kHz, P=1W)", "datos": x5, "teorica": 1.0},
-    {"nombre": "Bonus: Dientes de Sierra (2 kHz)", "datos": x_bonus, "teorica": 0.333}
+# Guardamos las señales para graficar
+seniales = [
+    {"nombre": "Seno (2 kHz)", "datos": x1},
+    {"nombre": "Seno Desfasado (2 kHz, P = 2W)", "datos": x2},
+    {"nombre": "Ruido Gaussiano (P = 0.1W)", "datos": x3},
+    {"nombre": "Ruido Uniforme (P = 0.1W)", "datos": x4},
+    {"nombre": "Onda Cuadrada (2 kHz, P = 1W)", "datos": x5}
 ]
 
-# =====================================================================
-# 3. VERIFICACIÓN NUMÉRICA DEL TEOREMA DE PARSEVAL
-# =====================================================================
-print("=" * 85)
-print(f"{'Señal Analizada':<32} | {'P_Tiempo (W)':<14} | {'P_Frecuencia (W)':<15} | {'Diferencia (W)':<12}")
-print("=" * 85)
+# ==========================================
+# 3. GRAFICACIÓN (Tiempo y Espectro FFT)
+# ==========================================
+# Creamos una cuadrícula de 5 filas por 2 columnas
+fig, axs = plt.subplots(5, 2, figsize=(12, 15))
 
-for s in senales:
+for i, s in enumerate(seniales):
     x = s["datos"]
     
-    # Potencia media en el tiempo: promedio de las muestras al cuadrado
-    pot_tiempo = np.mean(np.abs(x)**2)
-    
-    # DFT usando el algoritmo de la FFT (obtenemos los coeficientes complejos X[k])
-    X = np.fft.fft(x)
-    
-    # Potencia media en frecuencia (Teorema de Parseval): suma(|X[k]|^2) / N^2
-    pot_frecuencia = np.sum(np.abs(X)**2) / (N**2)
-    
-    diff = np.abs(pot_tiempo - pot_frecuencia)
-    print(f"{s['nombre']:<32} | {pot_tiempo:.6f}       | {pot_frecuencia:.6f}          | {diff:.2e}")
-print("=" * 85)
-
-# =====================================================================
-# 4. GRAFICACIÓN DE RESULTADOS (Tiempo vs Frecuencia)
-# =====================================================================
-fig, axs = plt.subplots(len(senales), 2, figsize=(14, 16))
-freqs = np.fft.rfftfreq(N, d=Ts)  # Eje de frecuencias unilateral (Hz)
-
-for i, s in enumerate(senales):
-    x = s["datos"]
-    
-    # Cantidad de muestras a mostrar en el tiempo para que sea estético
+    # --- Columna 1: Dominio del Tiempo ---
+    # Para ver la forma de las señales periódicas mostramos 30 muestras (3 ciclos).
+    # Para los ruidos mostramos 100 muestras para que se aprecie la aleatoriedad.
     muestras_vis = 100 if "Ruido" in s["nombre"] else 30
     
-    # A. Gráfico en el tiempo usando PLOT (Línea continua)
-    ax_t = axs[i, 0]
-    ax_t.plot(t[:muestras_vis] * 1000, x[:muestras_vis], color='C0', linewidth=1.8)
+    axs[i, 0].plot(t[:muestras_vis] * 1000, x[:muestras_vis], color="blue", linewidth=1.5)
+    axs[i, 0].axhline(0, color="black", linewidth=1.0) # Eje X en y=0
+    axs[i, 0].set_title(f"{s['nombre']} - Tiempo", fontsize=10)
+    axs[i, 0].set_ylabel("Amplitud [V]")
+    axs[i, 0].grid(True)
     
-    # Forzamos una línea negra sólida cruzando el origen y=0 en todo el eje X
-    ax_t.axhline(0, color='black', linewidth=1.2, zorder=3)
+    # --- Columna 2: Dominio de la Frecuencia (FFT Unilateral) ---
+    # Calculamos la FFT compleja y la normalizamos por N
+    X_fft = np.fft.rfft(x) / N
+    mag = np.abs(X_fft)
     
-    ax_t.set_title(f"{s['nombre']} - Dominio del Tiempo", fontsize=10, fontweight='bold')
-    ax_t.set_ylabel("Amplitud [V]")
-    ax_t.grid(True, linestyle=":", alpha=0.6)
+    # Multiplicamos por 2 los componentes (excepto continua) para recuperar la amplitud real
+    mag[1:-1] = 2 * mag[1:-1]
     
-    # B. Gráfico en frecuencia usando PLOT
-    ax_f = axs[i, 1]
-    X_unilateral = np.fft.rfft(x) / N
-    mag = np.abs(X_unilateral)
-    mag[1:-1] = 2 * mag[1:-1]  # Conservar energía unilateral
+    # Eje de frecuencias en Hz
+    freqs = np.fft.rfftfreq(N, d=1/fs)
     
-    ax_f.plot(freqs / 1000, mag, color="crimson", linewidth=1.5)
-    
-    # Forzamos la línea negra de referencia horizontal en y=0 en frecuencia
-    ax_f.axhline(0, color='black', linewidth=1.2, zorder=3)
-    
-    ax_f.set_title("Módulo de la FFT (Espectro Unilateral)", fontsize=10, fontweight='bold')
-    ax_f.set_ylabel("Magnitud Normalizada")
-    ax_f.grid(True, linestyle=":", alpha=0.6)
-    ax_f.set_xlim(0, fs / (2 * 1000))  # Límite en la frecuencia de Nyquist (10 kHz)
+    axs[i, 1].plot(freqs / 1000, mag, color="red", linewidth=1.5)
+    axs[i, 1].axhline(0, color="black", linewidth=1.0) # Eje X en y=0
+    axs[i, 1].set_title(f"{s['nombre']} - Espectro (FFT)", fontsize=10)
+    axs[i, 1].set_ylabel("Magnitud Normalizada")
+    axs[i, 1].grid(True)
+    axs[i, 1].set_xlim(0, fs / (2 * 1000)) # Acotamos el eje frecuencial hasta Nyquist (10 kHz)
 
-# Configuración de etiquetas finales de los ejes X
+# Configuramos las etiquetas finales en los ejes X de abajo de todo
 axs[-1, 0].set_xlabel("Tiempo [ms]")
 axs[-1, 1].set_xlabel("Frecuencia [kHz]")
 
 plt.tight_layout()
 plt.show()
-
