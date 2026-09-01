@@ -2,20 +2,19 @@ import numpy as np
 import scipy.signal as signal
 import matplotlib.pyplot as plt
 
-# ==========================================
-# 1. PARÁMETROS GENERALES DE MUESTREO
-# ==========================================
+
+# PARÁMETROS GENERALES 
 N = 1000          # Número de muestras 
 f0 = 2000         # Frecuencia de las señales (2 kHz)
 
-# Elegimos fs = 20 kHz para cumplir el requisito de tener "al menos 10 puntos por período"
+# Elegimos fs = 20 kHz para cumplir al menos 10 puntos por período
 # (fs / f0 = 20000 / 2000 = exactamente 10 puntos por ciclo)
 fs = 20000        
 t = np.arange(N) / fs
 
-# ==========================================
-# 2. SÍNTESIS DE LAS 5 SEÑALES
-# ==========================================
+
+# SÍNTESIS DE LAS 5 SEÑALES
+
 
 # Señal 1: Senoidal de 2 kHz (Amplitud de 1 V)
 x1 = np.sin(2 * np.pi * f0 * t)
@@ -46,16 +45,16 @@ seniales = [
     {"nombre": "Onda Cuadrada (2 kHz, P = 1W)", "datos": x5}
 ]
 
-# ==========================================
-# 3. GRAFICACIÓN (Tiempo y Espectro FFT)
-# ==========================================
+
+# 3. GRAFICOS (Tiempo y Espectro FFT)
+
 # Creamos una cuadrícula de 5 filas por 2 columnas
 fig, axs = plt.subplots(5, 2, figsize=(12, 15))
 
 for i, s in enumerate(seniales):
     x = s["datos"]
     
-    # --- Columna 1: Dominio del Tiempo ---
+    # Columna 1: Dominio del Tiempo
     # Para ver la forma de las señales periódicas mostramos 30 muestras (3 ciclos).
     # Para los ruidos mostramos 100 muestras para que se aprecie la aleatoriedad.
     muestras_vis = 100 if "Ruido" in s["nombre"] else 30
@@ -66,7 +65,7 @@ for i, s in enumerate(seniales):
     axs[i, 0].set_ylabel("Amplitud [V]")
     axs[i, 0].grid(True)
     
-    # --- Columna 2: Dominio de la Frecuencia (FFT Unilateral) ---
+    # Columna 2: Dominio de la Frecuencia (FFT Unilateral)
     # Calculamos la FFT compleja y la normalizamos por N
     X_fft = np.fft.rfft(x) / N
     mag = np.abs(X_fft)
