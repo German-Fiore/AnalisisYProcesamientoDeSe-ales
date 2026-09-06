@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # =============================================================================
-# 1. PARÁMETROS DE LA SIMULACIÓN
+# PARÁMETROS DE LA SIMULACIÓN
 # =============================================================================
 frecuencia_muestreo = 1000.0  # Frecuencia fs (1000 Hz)
 cant_muestras = 1000          # Muestras N
@@ -16,7 +16,7 @@ tiempo = np.arange(cant_muestras) / frecuencia_muestreo
 paso_cuantizacion = v_rango / (2**bits_adc)  # q = 0.125 V
 
 # =============================================================================
-# 2. GENERACIÓN DE SEÑALES
+# GENERACIÓN DE SEÑALES
 # =============================================================================
 # Senoidal pura s(t) de 1 Hz con potencia unitaria (Amplitud = sqrt(2))
 frec_fundamental = frecuencia_muestreo / cant_muestras
@@ -33,7 +33,7 @@ ruido_analogico = np.random.normal(0, np.sqrt(potencia_ruido_analogico), cant_mu
 senal_contaminada = senoidal_pura + ruido_analogico
 
 # =============================================================================
-# 3. CUANTIZACIÓN (ADC) Y ERROR
+# CUANTIZACIÓN (ADC) Y ERROR
 # =============================================================================
 # Cuantización por redondeo s_Q(t)
 senal_cuantizada = paso_cuantizacion * np.round(senal_contaminada / paso_cuantizacion)
@@ -45,7 +45,7 @@ senal_cuantizada = np.clip(senal_cuantizada, -v_rango, v_rango - paso_cuantizaci
 error_cuantizacion = senal_cuantizada - senal_contaminada
 
 # =============================================================================
-# 4. ANÁLISIS ESPECTRAL (PSD) Y PISOS DE RUIDO
+# ANÁLISIS ESPECTRAL (PSD) Y PISOS DE RUIDO
 # =============================================================================
 # FFT Unilateral normalizada por N
 fft_pura = np.fft.rfft(senoidal_pura) / cant_muestras
@@ -74,7 +74,7 @@ piso_analogico_db = 10 * np.log10(potencia_ruido_analogico / (cant_muestras / 2)
 piso_digital_db = 10 * np.log10(potencia_cuantizacion / (cant_muestras / 2))
 
 # =============================================================================
-# 5. VISUALIZACIÓN
+# VISUALIZACIÓN
 # =============================================================================
 
 # --- Gráfico 1: Dominio del Tiempo ---
@@ -113,6 +113,8 @@ plt.show()
 plt.figure(figsize=(10, 5))
 plt.hist(error_cuantizacion, bins=10, color="tab:blue", edgecolor="white")
 plt.plot([-paso_cuantizacion/2, -paso_cuantizacion/2, paso_cuantizacion/2, paso_cuantizacion/2], [0, 100, 100, 0], 'r--', lw=1.5)
+plt.xlabel("Error de cuantización $e_q$ [V]") 
+plt.ylabel("Cantidad de muestras")
 
 plt.title(rf"Ruido de cuantización para {bits_adc} bits - $\pm V_R = {v_rango}\text{{ V}} - q = {paso_cuantizacion}\text{{ V}}$")
 plt.xlim(-paso_cuantizacion, paso_cuantizacion)
