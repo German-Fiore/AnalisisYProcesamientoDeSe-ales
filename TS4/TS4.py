@@ -10,7 +10,7 @@ M = 200  # Realizaciones
 a0 = np.sqrt(2)  # Amplitud para P_s = 1 W
 Omega0 = np.pi / 2  # Omega0 = pi/2 -> bin k0 = 250
 
-# CORRECCIÓN 1: SNRs solicitadas en la consigna
+# SNRs 
 SNRs_dB = [3, 10]
 
 windows = {
@@ -41,13 +41,13 @@ for snr_db in SNRs_dB:
             noise = np.random.normal(0, sigma, N)
             x = a0 * np.sin(Omega1[j] * n) + noise
 
-            # 1. Estimador de Amplitud evaluado en Omega0 = pi/2
+            #  Estimador de Amplitud evaluado en Omega0 = pi/2
             X_w_Omega0 = np.sum(x * w * np.exp(-1j * Omega0 * n))
-            # CORRECCIÓN 2: Normalización directa por la suma de la ventana
+            #  Normalización directa por la suma de la ventana
             a_hat = (2 * np.abs(X_w_Omega0)) / w_sum
             a_estimates.append(a_hat)
 
-            # 2. Estimador de Frecuencia con interpolación parabólica (Log-FFT)
+            #  Estimador de Frecuencia con interpolación parabólica (Log-FFT)
             X_fft = np.abs(np.fft.rfft(x * w, n=n_pad))
             idx_max = np.argmax(X_fft)
 
@@ -90,7 +90,7 @@ for snr_db in SNRs_dB:
     print(f" RESULTADOS PARA SNR = {snr_db} dB")
     print("=" * 60)
 
-    # 1. Tabla de Estimación de Amplitud
+    #  Tabla de Estimación de Amplitud
     print("\nEstimación de Amplitud (a_hat):")
     print("-" * 65)
     print(
@@ -108,7 +108,7 @@ for snr_db in SNRs_dB:
     print(sa_a_line)
     print(va_a_line)
 
-    # 2. Tabla de Estimación de Frecuencia
+    #  Tabla de Estimación de Frecuencia
     print("\nEstimación de Frecuencia (Omega_hat):")
     print("-" * 65)
     print(
@@ -126,7 +126,7 @@ for snr_db in SNRs_dB:
     print(sa_w_line)
     print(va_w_line)
 
-    # 3. Histogramas Comparativos (4 Ventanas Juntas)
+    # Histogramas Comparativos (4 Ventanas Juntas)
     fig, axes = plt.subplots(1, 2, figsize=(14, 5))
 
     for w_name in windows:
