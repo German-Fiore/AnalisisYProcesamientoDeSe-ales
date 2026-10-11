@@ -1,0 +1,13 @@
+Correcciones de las TSs
+
+* TS3: Desparramo Espectral
+
+    * Excelente el formato del Notebook, se puede mejorar dividiendo el código en secciones y explicar lo que 
+      vas haciendo en el medio.
+    * En los gráficos el eje vertical tiene una etiqueta equivocada, en realidad la potencia es la sumatoria
+      de todos los valores en todo el rango de frecuencia digital de 0 a N-1. En el eje Y estamos con valores
+      de densidad de potencia. 
+    * Los gráficos los estás haciendo con plot, en realidad es mejor usar stem porque el espectro es discreto 
+      no continuo. Por lo menos en el primer subplot mostrás los puntos, pero unir con líneas no es correcto.
+    * En la conclusión estaría mejor hablar de los efectos en frecuencia de la ventana implícita y explícita 
+      cuando agregás el zero padding. Es decir explicar algo de ventaneo y convolución en frecuencia.
