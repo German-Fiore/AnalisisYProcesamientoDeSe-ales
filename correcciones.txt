@@ -11,3 +11,13 @@ Correcciones de las TSs
       no continuo. Por lo menos en el primer subplot mostrás los puntos, pero unir con líneas no es correcto.
     * En la conclusión estaría mejor hablar de los efectos en frecuencia de la ventana implícita y explícita 
       cuando agregás el zero padding. Es decir explicar algo de ventaneo y convolución en frecuencia.
+
+* TS4: Estimadores
+    
+    * El eje vertical de los histogramas tiene una etiqueta que no es correcta. En vez de Densidad debería ir 
+      algo como Conteo, Número de Casos, etc. Se cuenta la cantidad de casos dentro de las 200 realizaciones que 
+      caen entre los valores que definen el bin.
+    * La conclusión no está del todo clara. Por ejemplo, donde dice: ¨El experimento demostró numéricamente que 
+      no existe una ventana espectral óptima para todos los parámetros de manera simultánea. La elección de la 
+      ventana depende de la métrica que se desee priorizar en el procesamiento:¨ Ventana espectral? La ventana es 
+      temporal. Parámetros? Qué Parámetros? Métrica? Qué métrica?
